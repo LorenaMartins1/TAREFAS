@@ -1,71 +1,110 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const form = document.getElementById('task-form');
-  const toggleBtn = document.getElementById('toggle-mode');
-  const pdfBtn = document.getElementById('btn-pdf');
-  const plimSound = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.getElementById("task-form");
+  const daySelect = document.getElementById("day");
+  const taskInput = document.getElementById("task");
+  const table = document.getElementById("tasks-table");
+  const toggleModeButton = document.querySelector(".toggle-mode");
 
-  const icons = {
-    limpeza: '🧹',
-    cozinha: '🍽️',
-    roupa: '👕',
-    outro: '📝'
-  };
+  function getTasks() {
+    return JSON.parse(localStorage.getItem("tasks")) || {};
+  }
 
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  function saveTasks(tasks) {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+  }
 
-    const desc = document.getElementById('task-desc').value.trim();
-    const day = document.getElementById('task-day').value;
-    const person = document.getElementById('task-person').value.trim();
+  function addTaskToTable(day, taskText, completed = false, icon = "🧹") {
+    const tasks = getTasks();
 
-    if (!desc || !person) return;
+    if (!tasks[day]) tasks[day] = [];
+    tasks[day].push({ text: taskText, completed, icon });
+    saveTasks(tasks);
+    renderTasks();
+  }
 
-    let icon = icons.outro;
-    if (desc.toLowerCase().includes('lavar') || desc.toLowerCase().includes('limpar')) {
-      icon = icons.limpeza;
-    } else if (desc.toLowerCase().includes('cozinha') || desc.toLowerCase().includes('prato')) {
-      icon = icons.cozinha;
-    } else if (desc.toLowerCase().includes('roupa')) {
-      icon = icons.roupa;
+  function renderTasks() {
+    const tasks = getTasks();
+    const days = Object.keys(tasks);
+    const tbody = table.querySelector("tbody");
+    tbody.innerHTML = "";
+
+    for (let i = 0; i < 7; i++) {
+      const day = daySelect.options[i].value;
+      const row = document.createElement("tr");
+      const dayCell = document.createElement("td");
+      dayCell.textContent = day.charAt(0).toUpperCase() + day.slice(1);
+      row.appendChild(dayCell);
+
+      const taskCell = document.createElement("td");
+      if (tasks[day]) {
+        tasks[day].forEach((task, index) => {
+          const div = document.createElement("div");
+          div.classList.add("task");
+          if (task.completed) div.classList.add("done");
+
+          const iconSpan = document.createElement("span");
+          iconSpan.textContent = task.icon;
+          div.appendChild(iconSpan);
+
+          const span = document.createElement("span");
+          span.textContent = " " + task.text;
+          div.appendChild(span);
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = task.completed;
+          checkbox.addEventListener("change", () => {
+            task.completed = checkbox.checked;
+            if (checkbox.checked) {
+              new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_d1aa3982fa.mp3").play();
+            }
+            tasks[day][index] = task;
+            saveTasks(tasks);
+            renderTasks();
+          });
+          div.appendChild(checkbox);
+
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.addEventListener("click", () => {
+            tasks[day].splice(index, 1);
+            saveTasks(tasks);
+            renderTasks();
+          });
+          div.appendChild(delBtn);
+
+          taskCell.appendChild(div);
+        });
+      }
+      row.appendChild(taskCell);
+      tbody.appendChild(row);
     }
+  }
 
-    const task = document.createElement('div');
-    task.classList.add('task');
-    task.innerHTML = `
-      <span class="icon">${icon}</span>
-      <strong>${desc}</strong> - ${person}
-      <button class="delete" title="Excluir tarefa">🗑️</button>
-    `;
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    const day = daySelect.value;
+    const task = taskInput.value.trim();
+    if (task !== "") {
+      let icon = "🧹"; // default
+      if (/louça|prato/i.test(task)) icon = "🍽️";
+      else if (/cozinhar|comida/i.test(task)) icon = "🍳";
+      else if (/varrer|limpar/i.test(task)) icon = "🧹";
+      else if (/lavar/i.test(task)) icon = "🧼";
+      else if (/banheiro/i.test(task)) icon = "🚽";
+      else if (/cama/i.test(task)) icon = "🛏️";
 
-    task.addEventListener('click', () => {
-      task.classList.toggle('done');
-      plimSound.play();
-    });
-
-    task.querySelector('.delete').addEventListener('click', (e) => {
-      e.stopPropagation();
-      task.remove();
-    });
-
-    document.getElementById(day).appendChild(task);
-
-    form.reset();
+      addTaskToTable(day, task, false, icon);
+      taskInput.value = "";
+    }
   });
 
-  toggleBtn.addEventListener('click', () => {
-    document.body.classList.toggle('dark');
-    toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  toggleModeButton.addEventListener("click", function () {
+    document.body.classList.toggle("dark");
+    const icon = toggleModeButton.querySelector("i");
+    icon.classList.toggle("fa-sun");
+    icon.classList.toggle("fa-moon");
   });
 
-  pdfBtn.addEventListener('click', () => {
-    const semana = document.getElementById('semana');
-    const opt = {
-      margin: 0.2,
-      filename: 'tarefas.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(semana).save();
-  });
+  renderTasks();
 });
