@@ -34,6 +34,10 @@ O design foi pensado para ser:
 5. Use o botão da lua/sol no topo para alternar entre modo claro e escuro.
 6. Clique em **PDF** para gerar um arquivo com todas as tarefas organizadas.
 
+
+## 🚀 Visualizar:
+
+
 ---
 
 ## 🛠️ Tecnologias
