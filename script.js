@@ -1,70 +1,71 @@
-const form = document.getElementById("task-form");
-const descInput = document.getElementById("task-desc");
-const dayInput = document.getElementById("task-day");
-const personInput = document.getElementById("task-person");
-const printBtn = document.getElementById("print-btn");
-const modeBtn = document.getElementById("toggle-mode");
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('task-form');
+  const toggleBtn = document.getElementById('toggle-mode');
+  const pdfBtn = document.getElementById('btn-pdf');
+  const plimSound = new Audio('https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg');
 
-let tarefas = JSON.parse(localStorage.getItem("tarefasCasa")) || [];
+  const icons = {
+    limpeza: '🧹',
+    cozinha: '🍽️',
+    roupa: '👕',
+    outro: '📝'
+  };
 
-function salvar() {
-  localStorage.setItem("tarefasCasa", JSON.stringify(tarefas));
-}
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
 
-function criarElemento(tarefa, index) {
-  const div = document.createElement("div");
-  div.className = "task";
-  if (tarefa.feita) div.classList.add("done");
-  div.dataset.person = tarefa.pessoa.toLowerCase();
-  div.innerHTML = `
-    <strong>${tarefa.descricao}</strong><br />
-    👤 ${tarefa.pessoa}
-    <div class="actions">
-      <button onclick="toggleFeito(${index})">✅</button>
-      <button onclick="excluirTarefa(${index})">❌</button>
-    </div>
-  `;
-  return div;
-}
+    const desc = document.getElementById('task-desc').value.trim();
+    const day = document.getElementById('task-day').value;
+    const person = document.getElementById('task-person').value.trim();
 
-function render() {
-  document.querySelectorAll(".semana section").forEach(sec => sec.innerHTML = `<h2>${sec.id.charAt(0).toUpperCase() + sec.id.slice(1)}</h2>`);
-  tarefas.forEach((tarefa, i) => {
-    const elem = criarElemento(tarefa, i);
-    document.getElementById(tarefa.dia).appendChild(elem);
+    if (!desc || !person) return;
+
+    let icon = icons.outro;
+    if (desc.toLowerCase().includes('lavar') || desc.toLowerCase().includes('limpar')) {
+      icon = icons.limpeza;
+    } else if (desc.toLowerCase().includes('cozinha') || desc.toLowerCase().includes('prato')) {
+      icon = icons.cozinha;
+    } else if (desc.toLowerCase().includes('roupa')) {
+      icon = icons.roupa;
+    }
+
+    const task = document.createElement('div');
+    task.classList.add('task');
+    task.innerHTML = `
+      <span class="icon">${icon}</span>
+      <strong>${desc}</strong> - ${person}
+      <button class="delete" title="Excluir tarefa">🗑️</button>
+    `;
+
+    task.addEventListener('click', () => {
+      task.classList.toggle('done');
+      plimSound.play();
+    });
+
+    task.querySelector('.delete').addEventListener('click', (e) => {
+      e.stopPropagation();
+      task.remove();
+    });
+
+    document.getElementById(day).appendChild(task);
+
+    form.reset();
   });
-}
 
-function toggleFeito(i) {
-  tarefas[i].feita = !tarefas[i].feita;
-  salvar();
-  render();
-}
-
-function excluirTarefa(i) {
-  tarefas.splice(i, 1);
-  salvar();
-  render();
-}
-
-form.onsubmit = e => {
-  e.preventDefault();
-  tarefas.push({
-    descricao: descInput.value,
-    dia: dayInput.value,
-    pessoa: personInput.value,
-    feita: false
+  toggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    toggleBtn.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
   });
-  salvar();
-  render();
-  form.reset();
-};
 
-printBtn.onclick = () => window.print();
-
-modeBtn.onclick = () => {
-  document.body.classList.toggle("dark");
-};
-
-render();
-
+  pdfBtn.addEventListener('click', () => {
+    const semana = document.getElementById('semana');
+    const opt = {
+      margin: 0.2,
+      filename: 'tarefas.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(semana).save();
+  });
+});

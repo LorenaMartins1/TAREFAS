@@ -2,42 +2,45 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Organizador de Tarefas</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
   <header>
-    <h1>Organize sua Casa 💖</h1>
+    <h1>Organizador de Tarefas</h1>
     <button id="toggle-mode">🌙</button>
-    <button id="print-btn">🖨️ Imprimir/Salvar PDF</button>
   </header>
-  <main>
-    <form id="task-form">
-      <input type="text" id="task-desc" placeholder="Descrição da tarefa" required />
-      <select id="task-day">
-        <option value="segunda">Segunda</option>
-        <option value="terca">Terça</option>
-        <option value="quarta">Quarta</option>
-        <option value="quinta">Quinta</option>
-        <option value="sexta">Sexta</option>
-        <option value="sabado">Sábado</option>
-        <option value="domingo">Domingo</option>
-      </select>
-      <input type="text" id="task-person" placeholder="Responsável" required />
-      <button type="submit">Adicionar</button>
-    </form>
 
-    <div class="semana">
-      <section id="segunda"><h2>Segunda</h2></section>
-      <section id="terca"><h2>Terça</h2></section>
-      <section id="quarta"><h2>Quarta</h2></section>
-      <section id="quinta"><h2>Quinta</h2></section>
-      <section id="sexta"><h2>Sexta</h2></section>
-      <section id="sabado"><h2>Sábado</h2></section>
-      <section id="domingo"><h2>Domingo</h2></section>
-    </div>
-  </main>
+  <form id="task-form">
+    <input type="text" id="task-desc" placeholder="Descrição da tarefa" required />
+    <input type="text" id="task-person" placeholder="Responsável" required />
+    <select id="task-day">
+      <option value="domingo">Domingo</option>
+      <option value="segunda">Segunda</option>
+      <option value="terca">Terça</option>
+      <option value="quarta">Quarta</option>
+      <option value="quinta">Quinta</option>
+      <option value="sexta">Sexta</option>
+      <option value="sabado">Sábado</option>
+    </select>
+    <button type="submit">Adicionar</button>
+  </form>
+
+  <div id="semana">
+    <div class="dia" id="domingo"><h3>Domingo</h3></div>
+    <div class="dia" id="segunda"><h3>Segunda</h3></div>
+    <div class="dia" id="terca"><h3>Terça</h3></div>
+    <div class="dia" id="quarta"><h3>Quarta</h3></div>
+    <div class="dia" id="quinta"><h3>Quinta</h3></div>
+    <div class="dia" id="sexta"><h3>Sexta</h3></div>
+    <div class="dia" id="sabado"><h3>Sábado</h3></div>
+  </div>
+
+  <button id="btn-pdf">📄 PDF</button>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
