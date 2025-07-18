@@ -53,7 +53,6 @@ https://lorenamartins1.github.io/TAREFAS/
 
 - Salvar as tarefas no armazenamento local do navegador para não perder após recarregar a página;  
 - Permitir edição das tarefas;  
-- Suporte a múltiplos usuários com login;  
 - Mais ícones divertidos e sons personalizados.  
 
 ---
